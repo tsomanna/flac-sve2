@@ -91,6 +91,9 @@ FLAC__bool FLAC__bitreader_read_rice_signed_block(FLAC__BitReader *br, int vals[
 #ifdef FLAC__BMI2_SUPPORTED
 FLAC__bool FLAC__bitreader_read_rice_signed_block_bmi2(FLAC__BitReader *br, int vals[], uint32_t nvals, uint32_t parameter);
 #endif
+#if FLAC__SVE2_SUPPORTED
+FLAC__bool FLAC__bitreader_read_rice_signed_block_sve2(FLAC__BitReader *br, int vals[], uint32_t nvals, uint32_t parameter);
+#endif
 
 #if 0 /* UNUSED */
 FLAC__bool FLAC__bitreader_read_golomb_signed(FLAC__BitReader *br, int *val, uint32_t parameter);

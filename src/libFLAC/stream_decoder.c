@@ -395,6 +395,14 @@ static FLAC__StreamDecoderInitStatus init_stream_internal_(
 		decoder->private_->local_bitreader_read_rice_signed_block = FLAC__bitreader_read_rice_signed_block_bmi2;
 	}
 #endif
+#if FLAC__SVE2_SUPPORTED
+	if (decoder->private_->cpuinfo.arm64.sve2) {
+		decoder->private_->local_bitreader_read_rice_signed_block = FLAC__bitreader_read_rice_signed_block_sve2;
+#ifndef NDEBUG
+		fprintf(stderr, "libFLAC: Using SVE2 rice decoding path\n");
+#endif
+	}
+#endif
 
 	/* from here on, errors are fatal */
 

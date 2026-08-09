@@ -49,6 +49,14 @@
 #include <sys/auxv.h>
 #endif
 
+#if defined FLAC__CPU_ARM64 && defined _WIN32
+#include <windows.h>
+/* PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE may not be defined in older SDKs */
+#ifndef PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE
+#define PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE 47
+#endif
+#endif
+
 #if (defined FLAC__CPU_IA32 || defined FLAC__CPU_X86_64) && FLAC__HAS_X86INTRIN && !defined FLAC__NO_ASM
 
 /* these are flags in EDX of CPUID AX=00000001 */
@@ -199,6 +207,26 @@ x86_cpu_info (FLAC__CPUInfo *info)
 #endif
 }
 
+static void
+arm64_cpu_info (FLAC__CPUInfo *info)
+{
+#if defined FLAC__CPU_ARM64 && !defined FLAC__NO_ASM
+	info->use_asm = true;
+	info->arm64.neon = true; /* NEON is always available on ARM64 */
+	info->arm64.sve2 = false;
+
+#if defined _WIN32
+	/* Windows ARM64: use IsProcessorFeaturePresent for SVE2 detection */
+	if (IsProcessorFeaturePresent(PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE)) {
+		info->arm64.sve2 = true;
+	}
+#endif
+
+#else
+	info->use_asm = false;
+#endif
+}
+
 void FLAC__cpu_info (FLAC__CPUInfo *info)
 {
 	memset(info, 0, sizeof(*info));
@@ -207,6 +235,8 @@ void FLAC__cpu_info (FLAC__CPUInfo *info)
 	info->type = FLAC__CPUINFO_TYPE_IA32;
 #elif defined FLAC__CPU_X86_64
 	info->type = FLAC__CPUINFO_TYPE_X86_64;
+#elif defined FLAC__CPU_ARM64
+	info->type = FLAC__CPUINFO_TYPE_ARM64;
 #else
 	info->type = FLAC__CPUINFO_TYPE_UNKNOWN;
 #endif
@@ -215,6 +245,9 @@ void FLAC__cpu_info (FLAC__CPUInfo *info)
 	case FLAC__CPUINFO_TYPE_IA32: /* fallthrough */
 	case FLAC__CPUINFO_TYPE_X86_64:
 		x86_cpu_info (info);
+		break;
+	case FLAC__CPUINFO_TYPE_ARM64:
+		arm64_cpu_info (info);
 		break;
 	default:
 		info->use_asm = false;

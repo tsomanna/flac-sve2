@@ -55,6 +55,14 @@
 
 #endif
 
+#ifndef FLAC__CPU_ARM64
+
+#if defined(__aarch64__) || defined(_M_ARM64)
+#define FLAC__CPU_ARM64
+#endif
+
+#endif
+
 #ifndef __has_attribute
 #define __has_attribute(x) 0
 #endif
@@ -159,9 +167,17 @@
 #define FLAC__AVX_SUPPORTED 0
 #endif
 
+/* SVE2 intrinsics support detection */
+#if defined FLAC__CPU_ARM64 && FLAC__HAS_A64SVE2INTRIN
+#define FLAC__SVE2_SUPPORTED 1
+#else
+#define FLAC__SVE2_SUPPORTED 0
+#endif
+
 typedef enum {
 	FLAC__CPUINFO_TYPE_IA32,
 	FLAC__CPUINFO_TYPE_X86_64,
+	FLAC__CPUINFO_TYPE_ARM64,
 	FLAC__CPUINFO_TYPE_UNKNOWN
 } FLAC__CPUInfo_Type;
 
@@ -184,9 +200,15 @@ typedef struct {
 } FLAC__CPUInfo_x86;
 
 typedef struct {
+	FLAC__bool neon;
+	FLAC__bool sve2;
+} FLAC__CPUInfo_arm64;
+
+typedef struct {
 	FLAC__bool use_asm;
 	FLAC__CPUInfo_Type type;
 	FLAC__CPUInfo_x86 x86;
+	FLAC__CPUInfo_arm64 arm64;
 } FLAC__CPUInfo;
 
 void FLAC__cpu_info(FLAC__CPUInfo *info);

@@ -9,6 +9,7 @@ check_function_exists(lround HAVE_LROUND)
 include(CheckCSourceCompiles)
 include(CheckCPUArch)
 include(CheckA64NEON)
+include(CheckA64SVE2)
 
 check_cpu_arch_x64(FLAC__CPU_X86_64)
 if(NOT FLAC__CPU_X86_64)
@@ -25,6 +26,13 @@ else()
     check_cpu_arch_arm64(FLAC__CPU_ARM64)
     if(FLAC__CPU_ARM64)
          check_a64neon(FLAC__HAS_A64NEONINTRIN)
+         check_a64sve2(FLAC__HAS_A64SVE2INTRIN)
+    endif()
+endif()
+
+if(FLAC__CPU_ARM64 AND FLAC__HAS_A64SVE2INTRIN)
+    if(MSVC)
+        set_source_files_properties(bitreader_intrin_sve2.c PROPERTIES COMPILE_FLAGS /arch:armv8.2)
     endif()
 endif()
 
@@ -48,6 +56,7 @@ add_library(FLAC
     float.c
     format.c
     lpc.c
+    bitreader_intrin_sve2.c
     lpc_intrin_neon.c
     lpc_intrin_sse2.c
     lpc_intrin_sse41.c

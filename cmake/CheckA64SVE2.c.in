@@ -1,0 +1,10 @@
+#include <arm_sve.h>
+int main (void)
+{
+    svbool_t pg = svptrue_b32();
+    svuint32_t a = svdup_u32(0);
+    svuint32_t b = svdup_u32(1);
+    svuint32_t c = svadd_u32_z(pg, a, b);
+    (void)c;
+    return 0;
+}
