@@ -33,6 +33,8 @@ endif()
 if(FLAC__CPU_ARM64 AND FLAC__HAS_A64SVE2INTRIN)
     if(MSVC)
         set_source_files_properties(bitreader_intrin_sve2.c PROPERTIES COMPILE_FLAGS /arch:armv8.2)
+    else()
+        set_source_files_properties(bitreader_intrin_sve2.c PROPERTIES COMPILE_FLAGS "-march=armv8.2-a+sve2")
     endif()
 endif()
 

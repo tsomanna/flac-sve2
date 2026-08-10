@@ -57,6 +57,7 @@ EXTRA_DIST = \
 	flac.pc.in \
 	libFLAC.m4 \
 	version.rc \
+	bitreader_intrin_sve2.c \
 	deduplication/bitreader_read_rice_signed_block.c \
 	deduplication/lpc_compute_autocorrelation_intrin.c \
 	deduplication/lpc_compute_autocorrelation_intrin_sse2.c \
@@ -76,6 +77,13 @@ extra_ogg_sources = \
 	ogg_encoder_aspect.c \
 	ogg_helper.c \
 	ogg_mapping.c
+endif
+
+if FLAC__HAS_A64SVE2INTRIN
+noinst_LTLIBRARIES += libFLAC_sve2.la
+libFLAC_sve2_la_SOURCES = bitreader_intrin_sve2.c
+libFLAC_sve2_la_CFLAGS = $(AM_CFLAGS) -march=armv8.2-a+sve2
+libFLAC_sve2_la_CPPFLAGS = $(AM_CPPFLAGS)
 endif
 
 # see 'http://www.gnu.org/software/libtool/manual/libtool.html#Libtool-versioning' for numbering convention
@@ -113,6 +121,11 @@ libFLAC_sources = \
 	window.c \
 	$(windows_unicode_compat) \
 	$(extra_ogg_sources)
+
+if FLAC__HAS_A64SVE2INTRIN
+libFLAC_la_LIBADD += libFLAC_sve2.la
+libFLAC_static_la_LIBADD = libFLAC_sve2.la
+endif
 
 libFLAC_la_SOURCES = $(libFLAC_sources)
 

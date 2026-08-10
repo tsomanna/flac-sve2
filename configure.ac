@@ -162,6 +162,34 @@ else
   AC_DEFINE([FLAC__HAS_NEONINTRIN], 0)
 fi
 
+dnl Check for SVE2 intrinsics support
+has_a64sve2=no
+if test "x$cpu_arm64" = xtrue -a "x$asm_opt" = xyes; then
+  AC_MSG_CHECKING([whether arm_sve.h supports SVE2 with -march=armv8.2-a+sve2])
+  save_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS -march=armv8.2-a+sve2"
+  AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM([[#include <arm_sve.h>]],
+	[[svbool_t pg = svptrue_b32();
+	  svuint32_t a = svdup_u32(0);
+	  svuint32_t b = svdup_u32(1);
+	  svuint32_t c = svadd_u32_z(pg, a, b);
+	  (void)c;]])],
+	[AC_MSG_RESULT([yes])
+	 has_a64sve2=yes],
+	[AC_MSG_RESULT([no])])
+  CFLAGS="$save_CFLAGS"
+  if test "x$has_a64sve2" = xyes; then
+    AC_DEFINE([FLAC__HAS_A64SVE2INTRIN], 1, [Set to 1 if <arm_sve.h> supports SVE2 intrinsics.])
+    asm_optimisation=yes
+  else
+    AC_DEFINE([FLAC__HAS_A64SVE2INTRIN], 0)
+  fi
+else
+  AC_DEFINE([FLAC__HAS_A64SVE2INTRIN], 0)
+fi
+AM_CONDITIONAL(FLAC__HAS_A64SVE2INTRIN, test "x$has_a64sve2" = xyes)
+
 case "$host" in
 	i386-*-openbsd3.[[0-3]]) OBJ_FORMAT=aoutb ;;
 	*-*-cygwin|*mingw*) OBJ_FORMAT=win32 ;;

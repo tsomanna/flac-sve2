@@ -2,8 +2,14 @@ macro(CHECK_A64SVE2 VARIABLE)
     if(NOT DEFINED HAVE_${VARIABLE})
         message(STATUS "Check whether A64 SVE2 can be used")
         configure_file(${PROJECT_SOURCE_DIR}/cmake/CheckA64SVE2.c.in ${PROJECT_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckA64SVE2.c @ONLY)
-        try_compile(HAVE_${VARIABLE} "${PROJECT_BINARY_DIR}"
-            "${PROJECT_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckA64SVE2.c")
+        if(MSVC)
+            try_compile(HAVE_${VARIABLE} "${PROJECT_BINARY_DIR}"
+                "${PROJECT_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckA64SVE2.c")
+        else()
+            try_compile(HAVE_${VARIABLE} "${PROJECT_BINARY_DIR}"
+                "${PROJECT_BINARY_DIR}/CMakeFiles/CMakeTmp/CheckA64SVE2.c"
+                COMPILE_DEFINITIONS "-march=armv8.2-a+sve2")
+        endif()
         if(HAVE_${VARIABLE})
             message(STATUS "Check whether A64 SVE2 can be used - yes")
             set(${VARIABLE} 1 CACHE INTERNAL "Result of CHECK_A64SVE2" FORCE)
