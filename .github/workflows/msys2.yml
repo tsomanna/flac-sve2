@@ -2,22 +2,38 @@ name: Build on MSYS2
 
 on: [ push, pull_request ]
 
-permissions: read-all
-
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.runs-on }}
+
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            runs-on: windows-latest
+            msystem: mingw64
+            install: autotools mingw-w64-x86_64-gcc mingw-w64-x86_64-libogg
+            artifact_name: flac-win64-static
+            log_suffix: flac
+
+          - arch: arm64
+            runs-on: windows-11-arm
+            msystem: clangarm64
+            install: autotools mingw-w64-clang-aarch64-clang mingw-w64-clang-aarch64-libogg
+            artifact_name: flac-winarm64-static
+            log_suffix: flac-arm64
+
     steps:
       - name: Set git to use LF
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: mingw64
-          install: autotools mingw-w64-x86_64-gcc mingw-w64-x86_64-libogg
+          msystem: ${{ matrix.msystem }}
+          install: ${{ matrix.install }}
 
       - name: Install pandoc
         run: |
@@ -41,16 +57,16 @@ jobs:
           cp man/*.html flac
 
       - name: Upload logs on failure
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: flac-${{ github.sha }}-${{ github.run_id }}-logs
+          name: ${{ matrix.log_suffix }}-${{ github.sha }}-${{ github.run_id }}-logs
           path: |
             ./**/*.log
             ./**/out*.meta
 
       - name: Package build
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
-          name: flac-win64-static-${{ github.sha}}
+          name: ${{ matrix.artifact_name }}-${{ github.sha }}
           path: flac

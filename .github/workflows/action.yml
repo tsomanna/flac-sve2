@@ -4,8 +4,6 @@ on:
   push:
   pull_request:
 
-permissions: read-all
-
 jobs:
   build:
     strategy:
@@ -66,12 +64,32 @@ jobs:
             build-system: cmake
             configure-opts: '-DCMAKE_C_STANDARD=11 -DBUILD_SHARED_LIBS=ON'
 
+          - name: windows-11-arm-cmake
+            os: windows-11-arm
+            build-system: cmake
+            configure-opts: ''
+
+          - name: windows-11-arm-cmake-shared
+            os: windows-11-arm
+            build-system: cmake
+            configure-opts: '-DBUILD_SHARED_LIBS=ON'
+
+          - name: windows-11-arm-cmake-c11
+            os: windows-11-arm
+            build-system: cmake
+            configure-opts: '-DCMAKE_C_STANDARD=11'
+
+          - name: windows-11-arm-cmake-c11-shared
+            os: windows-11-arm
+            build-system: cmake
+            configure-opts: '-DCMAKE_C_STANDARD=11 -DBUILD_SHARED_LIBS=ON'
+
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         if: startsWith(matrix.build-system,'cmake')
         with:
           repository: xiph/ogg
@@ -137,7 +155,7 @@ jobs:
         run: ctest -V -C Release
 
       - name: Upload logs on failure
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: flac-${{ github.sha }}-${{ github.run_id }}-logs
