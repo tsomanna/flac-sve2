@@ -33,6 +33,7 @@ noinst_HEADERS = \
 	all.h \
 	bitmath.h \
 	bitreader.h \
+	bitreader_internal.h \
 	bitwriter.h \
 	cpu.h \
 	crc.h \
