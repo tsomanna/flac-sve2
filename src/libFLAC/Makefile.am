@@ -84,6 +84,10 @@ noinst_LTLIBRARIES += libFLAC_sve2.la
 libFLAC_sve2_la_SOURCES = bitreader_intrin_sve2.c
 libFLAC_sve2_la_CFLAGS = $(AM_CFLAGS) -march=armv8.2-a+sve2
 libFLAC_sve2_la_CPPFLAGS = $(AM_CPPFLAGS)
+libFLAC_la_LIBADD += libFLAC_sve2.la
+libFLAC_la_DEPENDENCIES += libFLAC_sve2.la
+libFLAC_static_la_LIBADD = libFLAC_sve2.la
+libFLAC_static_la_DEPENDENCIES = libFLAC_sve2.la
 endif
 
 # see 'http://www.gnu.org/software/libtool/manual/libtool.html#Libtool-versioning' for numbering convention
@@ -122,10 +126,6 @@ libFLAC_sources = \
 	$(windows_unicode_compat) \
 	$(extra_ogg_sources)
 
-if FLAC__HAS_A64SVE2INTRIN
-libFLAC_la_LIBADD += libFLAC_sve2.la
-libFLAC_static_la_LIBADD = libFLAC_sve2.la
-endif
 
 libFLAC_la_SOURCES = $(libFLAC_sources)
 
