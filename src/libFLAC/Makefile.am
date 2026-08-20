@@ -80,12 +80,14 @@ extra_ogg_sources = \
 endif
 
 if FLAC__HAS_A64SVE2INTRIN
-noinst_LTLIBRARIES += libFLAC_sve2.la
-libFLAC_sve2_la_SOURCES = bitreader_intrin_sve2.c
-libFLAC_sve2_la_CFLAGS = $(AM_CFLAGS) -march=armv8.2-a+sve2
-libFLAC_sve2_la_CPPFLAGS = $(AM_CPPFLAGS)
-libFLAC_la_LIBADD += $(builddir)/libFLAC_sve2.la
-libFLAC_static_la_LIBADD = $(builddir)/libFLAC_sve2.la
+SVE2_CFLAGS = -march=armv8.2-a+sve2
+
+bitreader_intrin_sve2.lo: $(srcdir)/bitreader_intrin_sve2.c
+	$(AM_V_CC)$(LTCOMPILE) $(SVE2_CFLAGS) -c -o $@ $(srcdir)/bitreader_intrin_sve2.c
+
+libFLAC_la_LIBADD += bitreader_intrin_sve2.lo
+libFLAC_static_la_LIBADD = bitreader_intrin_sve2.lo
+CLEANFILES = bitreader_intrin_sve2.lo
 endif
 
 # see 'http://www.gnu.org/software/libtool/manual/libtool.html#Libtool-versioning' for numbering convention
